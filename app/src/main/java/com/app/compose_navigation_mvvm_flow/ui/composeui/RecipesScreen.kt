@@ -33,6 +33,34 @@ import com.app.compose_navigation_mvvm_flow.utils.UiState
 import com.app.compose_navigation_mvvm_flow.viewmodels.MainViewModel
 
 @Composable
+fun RecipesScreen(navigation: NavController, mainViewModel: MainViewModel) {
+    LaunchedEffect(key1 = Unit) {
+        getReceipesListAPI(mainViewModel)
+    }
+    val state =  mainViewModel.uiStateReceipeList.collectAsState()
+    when (state.value) {
+        is UiState.Success -> {
+            ProgressLoader(isLoading = false)
+            (state.value as UiState.Success<Receipes>).data?.let {
+                it.recipes?.let { it1 ->
+                    RecipeList(recipes = it1) { recipe ->
+                        // Handle recipe click here
+                        navigation.navigate(Routes.getSecondScreenPath(recipe.id))
+                    }
+                }
+            }
+        }
+        is UiState.Loading -> {
+            ProgressLoader(isLoading = true)
+        }
+        is UiState.Error -> {
+            ProgressLoader(isLoading = false)
+            //Handle Error
+        }
+    }
+}
+
+@Composable
 fun RecipeListCard(recipe: Receipes.Recipe, onRecipeClick: (Receipes.Recipe) -> Unit) {
     Card(
         modifier = Modifier
@@ -91,34 +119,6 @@ fun RecipeList(recipes: List<Receipes.Recipe>, onRecipeClick: (Receipes.Recipe) 
     LazyColumn {
         items(recipes) { recipe ->
             RecipeListCard(recipe = recipe, onRecipeClick = onRecipeClick)
-        }
-    }
-}
-
-@Composable
-fun RecipesScreen(navigation: NavController, mainViewModel: MainViewModel) {
-    LaunchedEffect(key1 = Unit) {
-        getReceipesListAPI(mainViewModel)
-    }
-    val state =  mainViewModel.uiStateReceipeList.collectAsState()
-    when (state.value) {
-        is UiState.Success -> {
-            ProgressLoader(isLoading = false)
-            (state.value as UiState.Success<Receipes>).data?.let {
-                it.recipes?.let { it1 ->
-                    RecipeList(recipes = it1) { recipe ->
-                        // Handle recipe click here
-                        navigation.navigate(Routes.getSecondScreenPath(recipe.id))
-                    }
-                }
-            }
-        }
-        is UiState.Loading -> {
-            ProgressLoader(isLoading = true)
-        }
-        is UiState.Error -> {
-            ProgressLoader(isLoading = false)
-            //Handle Error
         }
     }
 }
