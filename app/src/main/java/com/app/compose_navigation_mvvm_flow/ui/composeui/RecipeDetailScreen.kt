@@ -1,22 +1,28 @@
 package com.app.compose_navigation_mvvm_flow.ui.composeui
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.app.compose_navigation_mvvm_flow.data.Receipes
 import com.app.compose_navigation_mvvm_flow.utils.UiState
@@ -24,28 +30,47 @@ import com.app.compose_navigation_mvvm_flow.viewmodels.MainViewModel
 
 
 @Composable
-fun RecipeDetailScreen(mainViewModel: MainViewModel, id: Int?) {
-    LaunchedEffect(key1 = Unit) {
-        getReceipesDetails(mainViewModel, id)
-    }
-    val state = mainViewModel.uiStateReceipeDetail.collectAsState()
-    when (state.value) {
-        is UiState.Success -> {
-            ProgressLoader(isLoading = false)
-            (state.value as UiState.Success<Receipes.Recipe>).data?.let {
-                RecipeDetailView(recipe = it)
+fun RecipeDetailScreen(navController: NavController, mainViewModel: MainViewModel, id: Int?) {
+    val scrollstate = rememberScrollState()
+    Scaffold(
+        topBar = {
+            CustomToolbarScreen(navController = navController, title = "Detail", true)
+        }
+    )
+    { innerPadding ->
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .verticalScroll(scrollstate)
+                .padding(2.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            //add your code
+            LaunchedEffect(key1 = Unit) {
+                getReceipesDetails(mainViewModel, id)
+            }
+            val state = mainViewModel.uiStateReceipeDetail.collectAsState()
+            when (state.value) {
+                is UiState.Success -> {
+                    ProgressLoader(isLoading = false)
+                    (state.value as UiState.Success<Receipes.Recipe>).data?.let {
+                        RecipeDetailView(recipe = it)
+                    }
+                }
+
+                is UiState.Loading -> {
+                    ProgressLoader(isLoading = true)
+                }
+
+                is UiState.Error -> {
+                    ProgressLoader(isLoading = false)
+                    //Handle Error
+                }
             }
         }
-
-        is UiState.Loading -> {
-            ProgressLoader(isLoading = true)
-        }
-
-        is UiState.Error -> {
-            ProgressLoader(isLoading = false)
-            //Handle Error
-        }
     }
+
 }
 
 private fun getReceipesDetails(mainViewModel: MainViewModel, id: Int?) {

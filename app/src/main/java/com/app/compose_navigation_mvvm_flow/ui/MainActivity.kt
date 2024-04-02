@@ -38,7 +38,7 @@ class MainActivity : ComponentActivity() {
                    type = NavType.IntType
                 })
                 ) {backStackEntry->
-                    RecipeDetailScreen(mainViewModel, backStackEntry.arguments?.getInt(Routes.Values.IDVALUE,0))
+                    RecipeDetailScreen(navController,mainViewModel, backStackEntry.arguments?.getInt(Routes.Values.IDVALUE,0))
                 }
             }
         }
